@@ -9,13 +9,13 @@ class BiznesradarSpider(scrapy.Spider):
     allowed_domains = ['biznesradar.pl']
 
     url_base = 'https://www.biznesradar.pl'
-    start_urls = [url_base+'/spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw']
+    start_urls = [url_base+'/spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw '] # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw  /spolki-raporty-finansowe-bilans/akcje_gpw  /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
 
     target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'biznesradar')
 
     def parse(self, response: scrapy.http.response.Response):
 
-        company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()[:1]
+        company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
 
         for link in company_links:
             yield scrapy.Request(self.url_base + link + ',Q',
@@ -32,7 +32,7 @@ class BiznesradarSpider(scrapy.Spider):
         labels = response.css(base_css + 'tr[data-field]::attr(data-field)').extract()
         values = response.css(base_css + 'td.h .value span::text, ' + base_css + 'td.h:empty::attr(class)').extract()
 
-        quarters = list(map(lambda x: x.replace('\n', '').replace('\t', ''), quarters))
+        quarters = list(map(lambda x: x.replace('\n', '').replace('\t', '').replace('\r', ''), quarters))
         values = list(map(lambda x: x.replace('h', '').replace(' ', '').replace('newest', ''), values))
 
         print(symbol)
@@ -59,11 +59,14 @@ class BiznesradarSpider(scrapy.Spider):
 
             df.at[labels[current_label_index], quarters[current_quarter_index]] = val
 
+        self.save_to_csv(df, target_file)
+
+    def save_to_csv(self, df, target_file):
         mode = 'w'
         header = True
-        # if os.path.isfile(target_file):
-        #     mode = 'a'
-        #     header = False
+        if os.path.isfile(target_file):
+            mode = 'a'
+            header = False
 
         if df.shape[0] != 0 and df.shape[1] != 0:
             with open(target_file, mode) as f:
