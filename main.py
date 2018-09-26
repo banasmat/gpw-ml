@@ -5,6 +5,7 @@ import os
 pd.set_option('display.width', 0)
 
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
+fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter')
 
 dfs_by_quarter = {}
 
@@ -27,3 +28,8 @@ for file in fundamental_files:
                 dfs_by_quarter[quarter].at[ticker, feature] = value
 
             print(dfs_by_quarter[quarter].head())
+
+for quarter, df in dfs_by_quarter.items():
+    file = os.path.join(fundamentals_by_quarter_dir, quarter + '.csv')
+    with open(os.path.join(fundamentals_dir, file), 'w') as f:
+        df.to_csv(f)
