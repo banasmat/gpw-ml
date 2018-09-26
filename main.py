@@ -30,6 +30,7 @@ for file in fundamental_files:
             print(dfs_by_quarter[quarter].head())
 
 for quarter, df in dfs_by_quarter.items():
+    quarter = quarter.replace('/', '')
     file = os.path.join(fundamentals_by_quarter_dir, quarter + '.csv')
     with open(os.path.join(fundamentals_dir, file), 'w') as f:
         df.to_csv(f)
