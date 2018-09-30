@@ -5,6 +5,7 @@ import os
 pd.set_option('display.width', 0)
 
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
+prices_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'prices-biznesradar')
 fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter')
 
 dfs_by_quarter = {}
@@ -26,6 +27,10 @@ for file in fundamental_files:
             print(ticker)
             for feature, value in df[quarter].iteritems():
                 dfs_by_quarter[quarter].at[ticker, feature] = value
+
+            with open(os.path.join(prices_dir, file), 'r') as price_f:
+                #TODO add Price column
+                pass
 
             print(dfs_by_quarter[quarter].head())
 

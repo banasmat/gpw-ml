@@ -21,7 +21,7 @@ class BiznesradarPricesSpider(scrapy.Spider):
         fundamental_files = os.listdir(BiznesradarPricesSpider.fundamentals_dir)
         all_tickers = list(map(lambda x: x[:-4], fundamental_files))
 
-        for ticker in all_tickers[1:]:
+        for ticker in all_tickers:
             self.ticker_urls.append(BiznesradarPricesSpider.url_base+'/notowania-historyczne/'+ticker)
         self.start_urls = self.ticker_urls[:1]
 
@@ -44,7 +44,8 @@ class BiznesradarPricesSpider(scrapy.Spider):
 
     def parse_price_page(self, response):
 
-        symbol = response.url.split('/')[-1:][0].split(',')[0]
+        # symbol = response.url.split('/')[-1:][0].split(',')[0]
+        symbol = response.css('#top-profile-tools .textseparatorfirst::text').extract()[0].replace(':', '')
         target_file = os.path.join(BiznesradarPricesSpider.target_dir, symbol + '.csv')
 
         base_css = ".qTableFull "
