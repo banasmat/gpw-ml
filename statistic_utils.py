@@ -141,8 +141,8 @@ def correlations(df, col_name):
 
 def correlation_heatmap(df):
     corrmat = df.corr()
-    # f, ax = plt.subplots(figsize=(12, 9))
-    sns.heatmap(corrmat, vmax=.8, square=True)
+    f, ax = plt.subplots(figsize=(12, 9))
+    sns.heatmap(corrmat, ax=ax, vmax=.8, square=True, cbar=False)
     plt.show()
 
 

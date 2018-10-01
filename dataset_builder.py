@@ -102,11 +102,12 @@ def organize_prices_to_quarters():
 
 
 def analyze_dataset():
+    dfs = []
     flat_df = None
     for file in sorted(os.listdir(fundamentals_by_quarter_dir)):
         df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), index_col=0)
-        df.drop('Price', inplace=True, axis=1)
-        sum_df = df.sum(axis=1)
+        dfs.append(df)
+        sum_df = df.drop('Price', axis=1).sum(axis=1)
         # remove empty rows
         df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
         if flat_df is None:
@@ -117,8 +118,42 @@ def analyze_dataset():
     print(flat_df.describe())
     print(statistic_utils.missing_data_ordered(flat_df, 100))
 
+    for df in reversed(dfs):
+        df.fillna(0, inplace=True)
+
+        statistic_utils.correlation_heatmap(df)
+        quit()
+
+        statistic_utils.compare_cols(df, [
+            # 'BalanceInventory',
+            # 'BalanceCurrentAssets',
+            # 'BalanceIntangibleAssets',
+            # 'CashflowAmortization',
+            # 'BalanceTotalAssets',
+            # 'CashflowFinancingCashflow',
+            # 'IncomeFinanceIncome',
+            # 'IncomeOtherOperatingCosts',
+            # 'BalanceOtherNoncurrentAssets',
+            # 'CashflowCapex',
+            # 'BalanceNoncurrentAssets',
+            # 'IncomeOtherOperatingIncome',
+            # 'CashflowInvestingCashflow',
+            # 'CashflowOperatingCashflow',
+            # 'IncomeEBIT',
+            'IncomeGrossProfit',
+            'IncomeRevenues',
+            'IncomeNetProfit',
+            'Price',
+        ])
+        quit()
+
+        statistic_utils.show_histogram(df.IncomeNetProfit)
+
+    # IncomeNetProfit: lots of outliers (mainly higher)
+
     #TODO compare most important (and full fields) through quarters
     # print distributions and corelations for every quarter
+    # create column: Price delta - check correlations (heatmap), maybe first scale data
 
 
     return flat_df
