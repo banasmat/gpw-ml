@@ -117,6 +117,9 @@ def analyze_dataset():
     print(flat_df.describe())
     print(statistic_utils.missing_data_ordered(flat_df, 100))
 
+    #TODO compare most important (and full fields) through quarters
+    # print distributions and corelations for every quarter
+
 
     return flat_df
 
