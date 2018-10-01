@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from datetime import datetime, timedelta
 import numpy as np
+import statistic_utils
 
 
 pd.set_option('display.width', 0)
@@ -98,4 +99,24 @@ def organize_prices_to_quarters():
         file = os.path.join(fundamentals_by_quarter_dir, quarter + '.csv')
         with open(os.path.join(fundamentals_dir, file), 'w') as f:
             df.to_csv(f)
+
+
+def analyze_dataset():
+    flat_df = None
+    for file in sorted(os.listdir(fundamentals_by_quarter_dir)):
+        df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), index_col=0)
+        df.drop('Price', inplace=True, axis=1)
+        sum_df = df.sum(axis=1)
+        # remove empty rows
+        df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
+        if flat_df is None:
+            flat_df = df
+        else:
+            flat_df = flat_df.append(df, ignore_index=True)
+
+    print(flat_df.describe())
+    print(statistic_utils.missing_data_ordered(flat_df, 100))
+
+
+    return flat_df
 
