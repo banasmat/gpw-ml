@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 import numpy as np
 import statistic_utils
+import pickle
 
 
 pd.set_option('display.width', 0)
@@ -10,6 +11,8 @@ pd.set_option('display.width', 0)
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
 prices_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'prices-biznesradar')
 fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter')
+dataset_x_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-x.pkl')
+dataset_y_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-y.pkl')
 
 
 def __quarter_to_date(quarter):
@@ -22,7 +25,7 @@ def __quarter_to_date(quarter):
     return datetime.strptime(dt, '%Y-%m-%d')
 
 
-def organize_prices_to_quarters():
+def organize_prices_to_quarters(fillna_method=None):
 
     dfs_by_quarter = {}
 
@@ -37,6 +40,7 @@ def organize_prices_to_quarters():
 
         with open(os.path.join(fundamentals_dir, file), 'r') as f:
             df = pd.read_csv(f, index_col=0)
+            df.fillna(method=fillna_method, axis=1, inplace=True)
             quarters = list(reversed(df.columns))
             last_quarter = quarters[0]
             if first_quarter is None:
@@ -158,3 +162,55 @@ def analyze_dataset():
 
     return flat_df
 
+
+def build_dataset(force_reset=False):
+    if False is force_reset and os.path.isfile(dataset_x_pickle) and os.path.isfile(dataset_y_pickle):
+        with open(dataset_x_pickle, 'rb') as f:
+            x = pickle.load(f)
+        with open(dataset_x_pickle, 'rb') as f:
+            y = pickle.load(f)
+        return x, y
+
+    dataset_x = None
+    dataset_y = None
+
+    quarter_files = os.listdir(fundamentals_by_quarter_dir)
+
+    for quarter_i ,file in enumerate(quarter_files):
+        with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
+            df = pd.read_csv(f, index_col=0, usecols=[
+                'BalanceInventory',
+                'BalanceCurrentAssets',
+                'BalanceIntangibleAssets',
+                'CashflowAmortization',
+                'BalanceTotalAssets',
+                'CashflowFinancingCashflow',
+                'IncomeFinanceIncome',
+                'IncomeOtherOperatingCosts',
+                'BalanceOtherNoncurrentAssets',
+                'CashflowCapex',
+                'BalanceNoncurrentAssets',
+                'IncomeOtherOperatingIncome',
+                'CashflowInvestingCashflow',
+                'CashflowOperatingCashflow',
+                'IncomeEBIT',
+                'IncomeGrossProfit',
+                'IncomeRevenues',
+                'IncomeNetProfit',
+                'Price',
+            ])
+
+        if dataset_x is None:
+            dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)-1))
+            dataset_y = np.zeros((len(quarter_files), len(df.index)))
+            pass
+
+        dataset_y[quarter_i] = df.pop('Price').values
+        dataset_x[quarter_i] = df.values
+
+    with open(dataset_x_pickle, 'wb') as f:
+        pickle.dump(dataset_x, f)
+    with open(dataset_y_pickle, 'wb') as f:
+        pickle.dump(dataset_y, f)
+
+    return dataset_x, dataset_y
