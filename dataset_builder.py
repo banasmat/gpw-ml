@@ -4,9 +4,12 @@ from datetime import datetime, timedelta
 import numpy as np
 import statistic_utils
 import pickle
+from sklearn.preprocessing import MinMaxScaler
 
 
 pd.set_option('display.width', 0)
+# np.set_printoptions(precision=4, suppress=True)
+np.set_printoptions(formatter={'all':lambda x: str(x)})
 
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
 prices_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'prices-biznesradar')
@@ -163,6 +166,7 @@ def analyze_dataset():
     return flat_df
 
 
+
 def build_dataset(force_reset=False):
     if False is force_reset and os.path.isfile(dataset_x_pickle) and os.path.isfile(dataset_y_pickle):
         with open(dataset_x_pickle, 'rb') as f:
@@ -208,9 +212,25 @@ def build_dataset(force_reset=False):
         dataset_y[quarter_i] = df.pop('Price').values
         dataset_x[quarter_i] = df.values
 
+    dataset_x = np.nan_to_num(dataset_x)
+    dataset_y = np.nan_to_num(dataset_y)
+
     with open(dataset_x_pickle, 'wb') as f:
         pickle.dump(dataset_x, f)
     with open(dataset_y_pickle, 'wb') as f:
         pickle.dump(dataset_y, f)
 
     return dataset_x, dataset_y
+
+
+def modify_to_diffs(x, y):
+
+    def get_scaled_diffs(a: np.array):
+        x = np.diff(a) / a[:-1]
+        x[x == np.inf] = 1
+        return np.nan_to_num(x)
+
+    x = np.apply_along_axis(get_scaled_diffs, 0, x)
+    y = np.apply_along_axis(get_scaled_diffs, 0, y)
+
+    return x, y
