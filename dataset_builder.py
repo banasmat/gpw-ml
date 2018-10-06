@@ -228,6 +228,7 @@ def modify_to_diffs(x, y):
     def get_scaled_diffs(a: np.array):
         x = np.diff(a) / a[:-1]
         x[x == np.inf] = 1
+        x[x == -np.inf] = -1
         return np.nan_to_num(x)
 
     x = np.apply_along_axis(get_scaled_diffs, 0, x)

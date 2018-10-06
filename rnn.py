@@ -15,7 +15,7 @@ def predict(x_test: np.array):
 
 def train(x_train, y_train):
     regressor = create_model(x_train)
-    history = regressor.fit(x_train, y_train, epochs=10, batch_size=x_train.shape[0])
+    history = regressor.fit(x_train, y_train, epochs=100, batch_size=x_train.shape[0])
     regressor.save(__get_model_path())
     return history
 
