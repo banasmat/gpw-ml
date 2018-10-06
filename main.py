@@ -7,8 +7,7 @@ import numpy as np
 # dataset_builder.organize_prices_to_quarters(fillna_method='ffill')
 #dataset = dataset_builder.analyze_dataset()
 x, y = dataset_builder.build_dataset(force_reset=False)
-#TODO consider filling gaps between values (fillna('ffill')
-#TODO consider adding features scaled to other tickers in one quarter
+#TODO move labels by 1 (predict next quarter price change)
 diffs_x, y = dataset_builder.modify_to_diffs(x, y)
 
 x = dataset_builder.scale_with_other_tickers(x)
