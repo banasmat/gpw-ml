@@ -5,6 +5,7 @@ import numpy as np
 import statistic_utils
 import pickle
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import minmax_scale
 
 
 pd.set_option('display.width', 0)
@@ -171,7 +172,7 @@ def build_dataset(force_reset=False):
     if False is force_reset and os.path.isfile(dataset_x_pickle) and os.path.isfile(dataset_y_pickle):
         with open(dataset_x_pickle, 'rb') as f:
             x = pickle.load(f)
-        with open(dataset_x_pickle, 'rb') as f:
+        with open(dataset_y_pickle, 'rb') as f:
             y = pickle.load(f)
         return x, y
 
@@ -229,9 +230,20 @@ def modify_to_diffs(x, y):
         x = np.diff(a) / a[:-1]
         x[x == np.inf] = 1
         x[x == -np.inf] = -1
+        # Insert zero at the beginning to retain initial shape
+        x = np.insert(x, 0, [0.0])
         return np.nan_to_num(x)
 
     x = np.apply_along_axis(get_scaled_diffs, 0, x)
     y = np.apply_along_axis(get_scaled_diffs, 0, y)
 
     return x, y
+
+
+def scale_with_other_tickers(x):
+
+    def scale_min_max(a: np.array):
+        return minmax_scale(a)
+
+    x = np.apply_along_axis(scale_min_max, 2, x)
+    return x
