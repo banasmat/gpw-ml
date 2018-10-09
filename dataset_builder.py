@@ -112,7 +112,7 @@ def organize_prices_to_quarters(fillna_method=None):
 def analyze_dataset():
     dfs = []
     flat_df = None
-    for file in sorted(os.listdir(fundamentals_by_quarter_dir)):
+    for file in sorted(os.listdir(fundamentals_by_quarter_dir))[1:]:
         df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), index_col=0)
         dfs.append(df)
         sum_df = df.drop('Price', axis=1).sum(axis=1)
@@ -224,7 +224,7 @@ def build_dataset(force_reset=False):
     return dataset_x, dataset_y
 
 
-def modify_to_diffs(x, y):
+def modify_to_diffs(x=None, y=None):
 
     def get_scaled_diffs(a: np.array):
         x = np.diff(a) / a[:-1]
@@ -234,8 +234,10 @@ def modify_to_diffs(x, y):
         x = np.insert(x, 0, [0.0])
         return np.nan_to_num(x)
 
-    x = np.apply_along_axis(get_scaled_diffs, 0, x)
-    y = np.apply_along_axis(get_scaled_diffs, 0, y)
+    if x is not None:
+        x = np.apply_along_axis(get_scaled_diffs, 0, x)
+    if y is not None:
+        y = np.apply_along_axis(get_scaled_diffs, 0, y)
 
     return x, y
 
