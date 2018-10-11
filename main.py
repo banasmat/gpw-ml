@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 
-# dataset_builder.organize_prices_to_quarters(fillna_method='ffill')
+# dataset_builder.organize_prices_to_quarters(fillna_method='ffill', save=True)
 #dataset_builder.analyze_dataset()
 x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
@@ -15,9 +15,9 @@ y = y[2:]
 #TODO why many predictions = -1? because of missing values ?
 
 
-diffs_x, y = dataset_builder.modify_to_diffs(x, y)
+diffs_x, none = dataset_builder.modify_to_diffs(x, y)
 
-x = dataset_builder.scale_with_other_tickers(x)
+# x = dataset_builder.scale_with_other_tickers(x)
 # Note: removing diffs from dataset gives worse result
 x = np.concatenate((x, diffs_x), 2)
 
