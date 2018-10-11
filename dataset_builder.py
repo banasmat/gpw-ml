@@ -186,6 +186,17 @@ def build_dataset(force_reset=False):
     for quarter_i ,file in enumerate(quarter_files):
         with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
             df = pd.read_csv(f, index_col=0, usecols=[
+                'IncomeCostOfSales',
+                'IncomeNetGrossProfit',
+                'IncomeBeforeTaxProfit',
+                'BalanceNoncurrInvestments',
+                'IncomeAdministrativExpenses',
+                'BalanceNoncurrentOtherLiabilities',
+                'BalanceCurrentInvestments',
+                'BalanceAssetsForSale',
+                'BalanceProperty',
+                'BalanceNoncurrentLeasing',
+                'IncomeFinanceCosts',
                 'BalanceInventory',
                 'BalanceCurrentAssets',
                 'BalanceIntangibleAssets',

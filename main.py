@@ -15,7 +15,7 @@ y = y[2:]
 #TODO why many predictions = -1? because of missing values ?
 
 
-diffs_x, none = dataset_builder.modify_to_diffs(x, y)
+diffs_x, y = dataset_builder.modify_to_diffs(x, y)
 
 # x = dataset_builder.scale_with_other_tickers(x)
 # Note: removing diffs from dataset gives worse result
