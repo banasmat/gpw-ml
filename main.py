@@ -6,10 +6,11 @@ import numpy as np
 
 # dataset_builder.organize_prices_to_quarters(fillna_method='ffill', save=True)
 #dataset_builder.analyze_dataset()
-x, y = dataset_builder.build_dataset(force_reset=False)
+x, y = dataset_builder.build_dataset(force_reset=True)
 # First quarter has almost no information
-# y is shifted by 1 forward, so we predict y in the future
+
 x = x[1:-1]
+# y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
 #TODO why many predictions = -1? because of missing values ?

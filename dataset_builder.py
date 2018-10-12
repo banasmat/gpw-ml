@@ -219,11 +219,11 @@ def build_dataset(force_reset=False):
             ])
 
         if dataset_x is None:
-            dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)-1))
+            dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)))
             dataset_y = np.zeros((len(quarter_files), len(df.index)))
             pass
 
-        dataset_y[quarter_i] = df.pop('Price').values
+        dataset_y[quarter_i] = df['Price'].values
         dataset_x[quarter_i] = df.values
 
     dataset_x = np.nan_to_num(dataset_x)
