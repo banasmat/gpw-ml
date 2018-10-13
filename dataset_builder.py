@@ -29,7 +29,7 @@ def __quarter_to_date(quarter):
     return datetime.strptime(dt, '%Y-%m-%d')
 
 
-def organize_prices_to_quarters(fillna_method=None, save=False):
+def organize_data_to_quarters(fillna_method=None, save=False):
 
     dfs_by_quarter = {}
 
@@ -44,7 +44,8 @@ def organize_prices_to_quarters(fillna_method=None, save=False):
 
         with open(os.path.join(fundamentals_dir, file), 'r') as f:
             df = pd.read_csv(f, index_col=0)
-            df.fillna(method=fillna_method, axis=1, inplace=True)
+            if fillna_method is not None:
+                df.fillna(method=fillna_method, axis=1, inplace=True)
             quarters = list(reversed(df.columns))
             last_quarter = quarters[0]
             if first_quarter is None:

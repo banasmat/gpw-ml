@@ -9,7 +9,7 @@ class BiznesradarSpider(scrapy.Spider):
     allowed_domains = ['biznesradar.pl']
 
     url_base = 'https://www.biznesradar.pl'
-    start_urls = [url_base+'/spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw '] # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw  /spolki-raporty-finansowe-bilans/akcje_gpw  /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
+    start_urls = [url_base+'/spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw'] # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw  /spolki-raporty-finansowe-bilans/akcje_gpw  /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
 
     target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'fundamentals-biznesradar')
 
