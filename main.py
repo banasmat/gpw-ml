@@ -26,13 +26,14 @@ x = np.nan_to_num(x)
 # print(y.shape)
 
 # print(stats.describe(x))
-history = rnn.train(x[:-1], y[:-1])
-plt.plot(history.history['mean_squared_error'])
-plt.show()
+# history = rnn.train(x[:-1], y[:-1])
+# plt.plot(history.history['mean_squared_error'])
+# plt.show()
 
 predictions = rnn.predict(x[-1:])
-print(predictions)
-print(y[-1:])
+
+for i, pred in enumerate(predictions[0][:100]):
+    print(i, pred, y[-1][i])
 
 plt.plot(predictions[0][:100])
 plt.plot(y[-1:][0][:100])
