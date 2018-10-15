@@ -6,7 +6,7 @@ import numpy as np
 
 # dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
 #dataset_builder.analyze_dataset()
-x, y = dataset_builder.build_dataset(force_reset=True)
+x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
 
 x = x[1:-1]
@@ -21,23 +21,41 @@ diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
 # quit()
 y = diffs_y
 
-# x = dataset_builder.scale_with_other_tickers(x)
+x = dataset_builder.scale_with_other_tickers(x)
 # Note: removing diffs from dataset gives worse result
 x = np.concatenate((x, diffs_x), 2)
 
 x = np.nan_to_num(x)
 # print(y.shape)
 
+# NOTE: after ca 2500 epochs all results turned to NaN
 # print(stats.describe(x))
-history = rnn.train(x[:-1], y[:-1])
-plt.plot(history.history['mean_squared_error'])
-plt.show()
+# history = rnn.train(x[:-1], y[:-1])
+# plt.plot(history.history['mean_squared_error'])
+# plt.show()
 
 predictions = rnn.predict(x[-1:])
+tickers = dataset_builder.get_tickers()
 
-for i, pred in enumerate(predictions[0][:100]):
-    print(i, pred, y[-1][i])
+predictions = predictions[0][100:200]
+test_data = y[-1:][0][100:200]
+tickers = tickers[100:200]
 
-plt.plot(predictions[0][:100])
-plt.plot(y[-1:][0][:100])
+for i, pred in enumerate(predictions):
+    print(tickers[i], pred, y[-1][i])
+
+
+ax = plt.subplot(111)
+ind = np.arange(len(tickers))
+width = 0.3
+bars1 = ax.bar(tickers, predictions, width=width, color='r')
+bars2 = ax.bar(ind + width, test_data, width=width, color='b')
+ax.set_xticklabels(tickers)
+plt.xticks(rotation=90, fontsize=12)
+
+ax.legend((bars1[0], bars2[0]), ('Predictions', 'Test data'))
+
+#
+# plt.plot(predictions[0][100:200], label='Predictions')
+# plt.plot(y[-1:][0][100:200], label='Test data')
 plt.show()

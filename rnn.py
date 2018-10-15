@@ -39,7 +39,7 @@ def create_model(x_data):
     regressor.add(Dense(units=x_data.shape[1]))
 
     # RMSprop optimizer is usually used for rnn
-    regressor.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae', 'mape', 'cosine'])
+    regressor.compile(optimizer='rmsprop', loss='mse', metrics=['mse', 'mae', 'mape', 'cosine'])
 
     return regressor
 

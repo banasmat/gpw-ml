@@ -112,6 +112,14 @@ def organize_data_to_quarters(fillna_method=None, save=False):
 
     return dfs_by_quarter
 
+
+def get_tickers():
+    file = sorted(os.listdir(fundamentals_by_quarter_dir))[-1]
+    with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
+        df = pd.read_csv(f, index_col=0)
+    return df.index.tolist()
+
+
 def analyze_dataset():
     dfs = []
     flat_df = None
