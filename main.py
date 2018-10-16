@@ -13,15 +13,16 @@ x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
-#TODO why many predictions = -1? because of missing values ?
+#TODO gather more features
 diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
 
 # for i, diff in enumerate(diffs_y[-1][:10]):
 #     print(i, diff, y[-2][i], y[-1][i])
 # quit()
-y = diffs_y
+# y = diffs_y
 
 x = dataset_builder.scale_with_other_tickers(x)
+y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
 x = np.concatenate((x, diffs_x), 2)
 
@@ -30,16 +31,16 @@ x = np.nan_to_num(x)
 
 # NOTE: after ca 2500 epochs all results turned to NaN
 # print(stats.describe(x))
-# history = rnn.train(x[:-1], y[:-1])
-# plt.plot(history.history['mean_squared_error'])
-# plt.show()
+history = rnn.train(x[:-1], y[:-1])
+plt.plot(history.history['mean_squared_error'])
+plt.show()
 
 predictions = rnn.predict(x[-1:])
 tickers = dataset_builder.get_tickers()
 
-predictions = predictions[0][100:200]
-test_data = y[-1:][0][100:200]
-tickers = tickers[100:200]
+predictions = predictions[0][:100]
+test_data = y[-1:][0][:100]
+tickers = tickers[:100]
 
 for i, pred in enumerate(predictions):
     print(tickers[i], pred, y[-1][i])
@@ -48,6 +49,10 @@ for i, pred in enumerate(predictions):
 ax = plt.subplot(111)
 ind = np.arange(len(tickers))
 width = 0.3
+
+# predictions = np.log(predictions)
+# test_data = np.log(test_data)
+
 bars1 = ax.bar(tickers, predictions, width=width, color='r')
 bars2 = ax.bar(ind + width, test_data, width=width, color='b')
 ax.set_xticklabels(tickers)

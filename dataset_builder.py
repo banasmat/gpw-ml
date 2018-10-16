@@ -271,3 +271,12 @@ def scale_with_other_tickers(x):
 
     x = np.apply_along_axis(scale_min_max, 2, x)
     return x
+
+
+def scale_prices(y):
+
+    def scale_min_max(a: np.array):
+        return minmax_scale(a)
+
+    x = np.apply_along_axis(scale_min_max, 1, y)
+    return x
