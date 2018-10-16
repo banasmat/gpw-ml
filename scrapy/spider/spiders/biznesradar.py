@@ -9,17 +9,30 @@ class BiznesradarSpider(scrapy.Spider):
     allowed_domains = ['biznesradar.pl']
 
     url_base = 'https://www.biznesradar.pl'
-    start_urls = [url_base+'/spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw'] # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw  /spolki-raporty-finansowe-bilans/akcje_gpw  /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
+    # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw
+    # /spolki-raporty-finansowe-bilans/akcje_gpw
+    # /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
 
-    target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'fundamentals-biznesradar')
+    # /spolki-wskazniki-wartosci-rynkowej/akcje_gpw
+    # /spolki-wskazniki-rentownosci/akcje_gpw
+    # /spolki-wskazniki-przeplywow-pienieznych/akcje_gpw
+    # /spolki-wskazniki-zadluzenia/akcje_gpw
+    # /spolki-wskazniki-plynnosci/akcje_gpw
+    # /spolki-wskazniki-aktywnosci/akcje_gpw
+    start_urls = [url_base+'/spolki-wskazniki-aktywnosci/akcje_gpw']
+
+    # target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'fundamentals-biznesradar')
+    target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'indicators-biznesradar')
 
     def parse(self, response: scrapy.http.response.Response):
 
         company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
 
         for link in company_links:
-            yield scrapy.Request(self.url_base + link + ',Q',
+            yield scrapy.Request(self.url_base + link,
                                  self.parse_company_page)
+            # yield scrapy.Request(self.url_base + link + ',Q',
+            #                      self.parse_company_page)
 
     def parse_company_page(self, response):
 
