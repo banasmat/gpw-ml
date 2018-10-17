@@ -13,6 +13,7 @@ pd.set_option('display.width', 0)
 np.set_printoptions(formatter={'all':lambda x: str(x)})
 
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
+indicators_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'indicators-biznesradar')
 prices_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'prices-biznesradar')
 fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter')
 dataset_x_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-x.pkl')
@@ -44,13 +45,19 @@ def organize_data_to_quarters(fillna_method=None, save=False):
 
         with open(os.path.join(fundamentals_dir, file), 'r') as f:
             df = pd.read_csv(f, index_col=0)
-            if fillna_method is not None:
-                df.fillna(method=fillna_method, axis=1, inplace=True)
+
             quarters = list(reversed(df.columns))
             last_quarter = quarters[0]
             if first_quarter is None:
                 first_quarter = quarters[-1:][0]
                 first_quarter = str(int(first_quarter[:4]) - 1) + '/Q4'
+
+            with open(os.path.join(indicators_dir, file), 'r') as ind_f:
+                ind_df = pd.read_csv(ind_f, index_col=0)
+                df = pd.concat([df, ind_df])
+
+            if fillna_method is not None:
+                df.fillna(method=fillna_method, axis=1, inplace=True)
 
             for quarter in quarters:
                 if quarter not in dfs_by_quarter:
