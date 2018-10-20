@@ -213,7 +213,7 @@ def get_tickers():
 def analyze_dataset():
     dfs = []
     flat_df = None
-    for file in sorted(os.listdir(fundamentals_by_quarter_dir))[1:]:
+    for file in sorted(os.listdir(fundamentals_by_quarter_diffs_dir))[1:]:
         df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), index_col=0)
         dfs.append(df)
         sum_df = df.drop('Price', axis=1).sum(axis=1)
@@ -233,7 +233,7 @@ def analyze_dataset():
         # statistic_utils.correlation_heatmap(df)
         # quit()
 
-        statistic_utils.compare_cols(df, [
+        cols = [
             # 'BalanceInventory',
             # 'BalanceCurrentAssets',
             # 'BalanceIntangibleAssets',
@@ -253,7 +253,12 @@ def analyze_dataset():
             'IncomeRevenues',
             'IncomeNetProfit',
             'Price',
-        ])
+        ]
+
+        cols = list(map(lambda x: x + '_diff', fundamental_cols))
+
+        statistic_utils.compare_cols(df, cols)
+
         quit()
 
         statistic_utils.show_histogram(df.IncomeNetProfit)

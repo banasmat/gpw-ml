@@ -5,7 +5,7 @@ from scipy import stats
 import numpy as np
 
 #dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
-#dataset_builder.analyze_dataset()
+dataset_builder.analyze_dataset()
 
 x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
