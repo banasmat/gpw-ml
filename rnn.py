@@ -23,11 +23,11 @@ def train(x_train, y_train):
 def create_model(x_data):
     regressor = Sequential()
 
-    regressor.add(SimpleRNN(units=400, return_sequences=True, input_shape=(x_data.shape[1], x_data.shape[2])))
+    regressor.add(SimpleRNN(units=800, return_sequences=True, input_shape=(x_data.shape[1], x_data.shape[2])))
             # , kernel_regularizer=L1L2(0.01), activity_regularizer=L1L2(0.01), recurrent_regularizer=L1L2(0.01)))
     regressor.add(Dropout(0.2))
 
-    regressor.add(SimpleRNN(units=400, return_sequences=True, activation='relu'))
+    regressor.add(SimpleRNN(units=600, return_sequences=True, activation='relu'))
     regressor.add(Dropout(0.2))
 
     regressor.add(SimpleRNN(units=400, return_sequences=True, activation='relu'))
@@ -39,7 +39,7 @@ def create_model(x_data):
     regressor.add(Dense(units=x_data.shape[1]))
 
     # RMSprop optimizer is usually used for rnn
-    regressor.compile(optimizer='rmsprop', loss='mse', metrics=['mse', 'mae', 'mape', 'cosine'])
+    regressor.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae', 'mape', 'cosine'])
 
     return regressor
 

@@ -6,23 +6,24 @@ import numpy as np
 
 #dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
 #dataset_builder.analyze_dataset()
+
 x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
-
 x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
 #TODO gather more features
 diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
+# dataset_builder.save_diffs_df(diffs_x, diffs_y)
 
 # for i, diff in enumerate(diffs_y[-1][:10]):
 #     print(i, diff, y[-2][i], y[-1][i])
 # quit()
-# y = diffs_y
+y = diffs_y
 
 x = dataset_builder.scale_with_other_tickers(x)
-y = dataset_builder.scale_prices(y)
+# y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
 x = np.concatenate((x, diffs_x), 2)
 

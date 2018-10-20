@@ -16,8 +16,91 @@ fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fund
 indicators_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'indicators-biznesradar')
 prices_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'prices-biznesradar')
 fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter')
+fundamentals_by_quarter_diffs_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter-diffs')
 dataset_x_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-x.pkl')
 dataset_y_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-y.pkl')
+
+fundamental_cols = (
+                'IncomeCostOfSales',
+                'IncomeNetGrossProfit',
+                'IncomeBeforeTaxProfit',
+                'BalanceNoncurrInvestments',
+                'IncomeAdministrativExpenses',
+                'BalanceNoncurrentOtherLiabilities',
+                'BalanceCurrentInvestments',
+                'BalanceAssetsForSale',
+                'BalanceProperty',
+                'BalanceNoncurrentLeasing',
+                'IncomeFinanceCosts',
+                'BalanceInventory',
+                'BalanceCurrentAssets',
+                'BalanceIntangibleAssets',
+                'CashflowAmortization',
+                'BalanceTotalAssets',
+                'CashflowFinancingCashflow',
+                'IncomeFinanceIncome',
+                'IncomeOtherOperatingCosts',
+                'BalanceOtherNoncurrentAssets',
+                'CashflowCapex',
+                'BalanceNoncurrentAssets',
+                'IncomeOtherOperatingIncome',
+                'CashflowInvestingCashflow',
+                'CashflowOperatingCashflow',
+                'IncomeEBIT',
+                'IncomeGrossProfit',
+                'IncomeRevenues',
+                'IncomeNetProfit',
+                'Price',
+
+                # indicators
+                'QuoteCurrent',
+                'ShareAmountCurrent',
+                'WKCurrent',
+                'CWKCurrent',
+                'WKGrahamCurrent',
+                'CWKGrahamCurrent',
+                'PCurrent',
+                'CPCurrent',
+                'ZCurrent',
+                'CZCurrent',
+                'ZOCurrent',
+                'CZOCurrent',
+                'EVCurrent',
+                'EVPCurrent',
+                'EVEBITCurrent',
+                'EVEBITDACurrent',
+                'DTAR',
+                'CG',
+                'LDER',
+                'PZAT',
+                'PELDR',
+                'TSF',
+                'ZKO',
+                'OSF',
+                'NetDebt',
+                'NetDebtEBITDA',
+                'DebtFin',
+                'DebtFinEBITDA',
+                'SP1',
+                'SP2',
+                'CAR',
+                'QR',
+                'CR',
+                'PP',
+                'RCLR',
+                'KP',
+                'PKKO',
+                'RN',
+                'CRN',
+                'CPZ',
+                'RZ',
+                'CRZ',
+                'RMO',
+                'RMT',
+                'RM',
+                'COP',
+                'CSP',
+            )
 
 
 def __quarter_to_date(quarter):
@@ -146,9 +229,9 @@ def analyze_dataset():
 
     for df in reversed(dfs):
         df.fillna(0, inplace=True)
-
-        statistic_utils.correlation_heatmap(df)
-        quit()
+        #
+        # statistic_utils.correlation_heatmap(df)
+        # quit()
 
         statistic_utils.compare_cols(df, [
             # 'BalanceInventory',
@@ -201,87 +284,7 @@ def build_dataset(force_reset=False):
 
     for quarter_i ,file in enumerate(quarter_files):
         with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
-            df = pd.read_csv(f, index_col=0, usecols=[
-                'IncomeCostOfSales',
-                'IncomeNetGrossProfit',
-                'IncomeBeforeTaxProfit',
-                'BalanceNoncurrInvestments',
-                'IncomeAdministrativExpenses',
-                'BalanceNoncurrentOtherLiabilities',
-                'BalanceCurrentInvestments',
-                'BalanceAssetsForSale',
-                'BalanceProperty',
-                'BalanceNoncurrentLeasing',
-                'IncomeFinanceCosts',
-                'BalanceInventory',
-                'BalanceCurrentAssets',
-                'BalanceIntangibleAssets',
-                'CashflowAmortization',
-                'BalanceTotalAssets',
-                'CashflowFinancingCashflow',
-                'IncomeFinanceIncome',
-                'IncomeOtherOperatingCosts',
-                'BalanceOtherNoncurrentAssets',
-                'CashflowCapex',
-                'BalanceNoncurrentAssets',
-                'IncomeOtherOperatingIncome',
-                'CashflowInvestingCashflow',
-                'CashflowOperatingCashflow',
-                'IncomeEBIT',
-                'IncomeGrossProfit',
-                'IncomeRevenues',
-                'IncomeNetProfit',
-                'Price',
-
-                # indicators
-                'QuoteCurrent',
-                'ShareAmountCurrent',
-                'WKCurrent',
-                'CWKCurrent',
-                'WKGrahamCurrent',
-                'CWKGrahamCurrent',
-                'PCurrent',
-                'CPCurrent',
-                'ZCurrent',
-                'CZCurrent',
-                'ZOCurrent',
-                'CZOCurrent',
-                'EVCurrent',
-                'EVPCurrent',
-                'EVEBITCurrent',
-                'EVEBITDACurrent',
-                'DTAR',
-                'CG',
-                'LDER',
-                'PZAT',
-                'PELDR',
-                'TSF',
-                'ZKO',
-                'OSF',
-                'NetDebt',
-                'NetDebtEBITDA',
-                'DebtFin',
-                'DebtFinEBITDA',
-                'SP1',
-                'SP2',
-                'CAR',
-                'QR',
-                'CR',
-                'PP',
-                'RCLR',
-                'KP',
-                'PKKO',
-                'RN',
-                'CRN',
-                'CPZ',
-                'RZ',
-                'CRZ',
-                'RMO',
-                'RMT',
-                'RM',
-                'COP',
-                'CSP',
-            ])
+            df = pd.read_csv(f, index_col=0, usecols=fundamental_cols)
 
         if dataset_x is None:
             dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)))
@@ -318,6 +321,22 @@ def modify_to_diffs(x=None, y=None):
         y = np.apply_along_axis(get_scaled_diffs, 0, y)
 
     return x, y
+
+
+def save_diffs_df(diffs_x, diffs_y):
+    quarter_files = os.listdir(fundamentals_by_quarter_dir)
+    all_tickers = get_tickers()
+    cols = list(map(lambda x: x + '_diff', fundamental_cols))
+
+    for quarter_i, file in enumerate(quarter_files[1:]):
+        df = pd.DataFrame(index=all_tickers, columns=cols)
+
+        for i, ticker_diffs in enumerate(diffs_x[quarter_i]):
+            df.iloc[i] = ticker_diffs.tolist() + [diffs_y[quarter_i][0]]
+        # print(file)
+        # print(df)
+        with open(os.path.join(fundamentals_by_quarter_diffs_dir, file), 'w') as diff_f:
+            df.to_csv(diff_f)
 
 
 def scale_with_other_tickers(x):
