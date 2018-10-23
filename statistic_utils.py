@@ -183,3 +183,11 @@ def log_skewed_cols(df):
     skewed_features = skewness.index
     df[skewed_features] = np.log1p(df[skewed_features])
     return df
+
+
+def scatter_compare(df, col_1, col_2):
+    fig, ax = plt.subplots(figsize=(16, 8))
+    ax.scatter(df[col_1], df[col_2])
+    ax.set_xlabel(col_1)
+    ax.set_ylabel(col_2)
+    plt.show()

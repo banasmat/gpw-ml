@@ -214,9 +214,9 @@ def analyze_dataset():
     dfs = []
     flat_df = None
     for file in sorted(os.listdir(fundamentals_by_quarter_diffs_dir))[1:]:
-        df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), index_col=0)
+        df = pd.read_csv(os.path.join(fundamentals_by_quarter_diffs_dir, file), index_col=0)
         dfs.append(df)
-        sum_df = df.drop('Price', axis=1).sum(axis=1)
+        sum_df = df.drop('Price_diff', axis=1).sum(axis=1)
         # remove empty rows
         df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
         if flat_df is None:
@@ -224,8 +224,8 @@ def analyze_dataset():
         else:
             flat_df = flat_df.append(df, ignore_index=True)
 
-    print(flat_df.describe())
-    print(statistic_utils.missing_data_ordered(flat_df, 100))
+    # print(flat_df.describe())
+    # print(statistic_utils.missing_data_ordered(flat_df, 100))
 
     for df in reversed(dfs):
         df.fillna(0, inplace=True)
@@ -233,35 +233,36 @@ def analyze_dataset():
         # statistic_utils.correlation_heatmap(df)
         # quit()
 
-        cols = [
-            # 'BalanceInventory',
-            # 'BalanceCurrentAssets',
-            # 'BalanceIntangibleAssets',
-            # 'CashflowAmortization',
-            # 'BalanceTotalAssets',
-            # 'CashflowFinancingCashflow',
-            # 'IncomeFinanceIncome',
-            # 'IncomeOtherOperatingCosts',
-            # 'BalanceOtherNoncurrentAssets',
-            # 'CashflowCapex',
-            # 'BalanceNoncurrentAssets',
-            # 'IncomeOtherOperatingIncome',
-            # 'CashflowInvestingCashflow',
-            # 'CashflowOperatingCashflow',
-            # 'IncomeEBIT',
-            'IncomeGrossProfit',
-            'IncomeRevenues',
-            'IncomeNetProfit',
-            'Price',
-        ]
+        # cols = [
+        #     # 'BalanceInventory',
+        #     # 'BalanceCurrentAssets',
+        #     # 'BalanceIntangibleAssets',
+        #     # 'CashflowAmortization',
+        #     # 'BalanceTotalAssets',
+        #     # 'CashflowFinancingCashflow',
+        #     # 'IncomeFinanceIncome',
+        #     # 'IncomeOtherOperatingCosts',
+        #     # 'BalanceOtherNoncurrentAssets',
+        #     # 'CashflowCapex',
+        #     # 'BalanceNoncurrentAssets',
+        #     # 'IncomeOtherOperatingIncome',
+        #     # 'CashflowInvestingCashflow',
+        #     # 'CashflowOperatingCashflow',
+        #     # 'IncomeEBIT',
+        #     'IncomeGrossProfit',
+        #     'IncomeRevenues',
+        #     'IncomeNetProfit',
+        #     'Price',
+        # ]
+        cols = df.columns
+        cols = list(map(lambda x: x + '_diff', cols))
+        # print(cols)
+        # statistic_utils.compare_cols(df, cols)
 
-        cols = list(map(lambda x: x + '_diff', fundamental_cols))
+        statistic_utils.show_histogram(df.Price_diff)
 
-        statistic_utils.compare_cols(df, cols)
-
+        #statistic_utils.scatter_compare(df, 'Price_diff', 'IncomeNetProfit_diff')
         quit()
-
-        statistic_utils.show_histogram(df.IncomeNetProfit)
 
     # IncomeNetProfit: lots of outliers (mainly higher)
 
@@ -360,3 +361,12 @@ def scale_prices(y):
 
     x = np.apply_along_axis(scale_min_max, 1, y)
     return x
+
+
+def shrink_outliers(data: np.array, m=2, border=None, middle='median'):
+    if border is None:
+        border = m * np.std(data)
+    middle = np.median(data) if middle == 'median' else np.mean(data)
+    data[data - middle > border] = border
+    data[(data < 0) & (abs(data - middle) > border)] = -1.0 * border
+    return data

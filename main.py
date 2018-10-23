@@ -5,7 +5,7 @@ from scipy import stats
 import numpy as np
 
 #dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
-dataset_builder.analyze_dataset()
+# dataset_builder.analyze_dataset()
 
 x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
@@ -13,7 +13,9 @@ x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
-#TODO gather more features
+#TODO identify / elimiate diff outliers
+# - visualize diffs (flat / by quarter)
+# - check in real data what is going on
 diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
 # dataset_builder.save_diffs_df(diffs_x, diffs_y)
 
@@ -26,6 +28,8 @@ x = dataset_builder.scale_with_other_tickers(x)
 # y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
 x = np.concatenate((x, diffs_x), 2)
+# TODO consider using np.log instead
+x = dataset_builder.shrink_outliers(x, 1, border=10.0)
 
 x = np.nan_to_num(x)
 # print(y.shape)
