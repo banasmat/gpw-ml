@@ -19,13 +19,17 @@ class BiznesradarSpider(scrapy.Spider):
     # /spolki-wskazniki-zadluzenia/akcje_gpw
     # /spolki-wskazniki-plynnosci/akcje_gpw
     # /spolki-wskazniki-aktywnosci/akcje_gpw
-    start_urls = [url_base+'/spolki-wskazniki-aktywnosci/akcje_gpw']
 
-    # target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'fundamentals-biznesradar')
-    target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', 'indicators-biznesradar')
+    def __init__(self,
+                 start_url='spolki-raporty-finansowe-rachunek-zyskow-i-strat',
+                 target_dir='fundamentals-biznesradar',
+                 *args, **kwargs):
+        super(BiznesradarSpider, self).__init__(*args, **kwargs)
+        self.start_urls = [self.url_base + '/' + start_url + '/akcje_gpw']
+        self.target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', target_dir)
+
 
     def parse(self, response: scrapy.http.response.Response):
-
         company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
 
         for link in company_links:
@@ -37,7 +41,7 @@ class BiznesradarSpider(scrapy.Spider):
     def parse_company_page(self, response):
 
         symbol = response.css(".report-table::attr(data-symbol)").extract()[0]
-        target_file = os.path.join(BiznesradarSpider.target_dir, symbol + '.csv')
+        target_file = os.path.join(self.target_dir, symbol + '.csv')
 
         base_css = ".report-table "
 
