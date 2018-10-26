@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 
-#dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
+# dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
 # dataset_builder.analyze_dataset()
 
 x, y = dataset_builder.build_dataset(force_reset=False)
@@ -13,11 +13,20 @@ x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
-#TODO identify / elimiate diff outliers
-# - visualize diffs (flat / by quarter)
-# - check in real data what is going on
+# Note: sometimes diffs are very large between quarters e.g. 06N IncomeOtherOperatingCosts 2013/Q3 (1000) - 2013/Q4 (1397000) FIXME checked on webiste, this data is not there ???
+# TODO we might need to use years instead of quarters BUT should we take mean or sum
+# - maybe just scrape yearly data (?) -> checked, still differernces might be pretty large
+# - OR scrape diff data from biznesradar (look into html source)
+# - OR use logarithm for diffs
+
+
+
 diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
 # dataset_builder.save_diffs_df(diffs_x, diffs_y)
+
+
+print(np.max(diffs_x))
+quit()
 
 # for i, diff in enumerate(diffs_y[-1][:10]):
 #     print(i, diff, y[-2][i], y[-1][i])

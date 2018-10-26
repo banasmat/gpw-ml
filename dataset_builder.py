@@ -313,10 +313,22 @@ def build_dataset(force_reset=False):
 
 def modify_to_diffs(x=None, y=None):
 
-    def get_scaled_diffs(a: np.array):
-        x = np.diff(a) / a[:-1]
+    def get_scaled_diffs(x: np.array):
+
+        print('A')
+        print(x[0])
+        print(x[1])
+
+        x = np.diff(x) / x[:-1]
+
         x[x == np.inf] = 1
         x[x == -np.inf] = -1
+
+        if len(x[x > 100]) > 0:
+            for i, el in enumerate(x):
+                print(i, el)
+            quit()
+
         # Insert zero at the beginning to retain initial shape
         x = np.insert(x, 0, [0.0])
         return np.nan_to_num(x)
