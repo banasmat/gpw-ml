@@ -26,7 +26,7 @@ targets = {
 }
 
 no_log = ''
-# no_log = '--nolog'
+no_log = '--nolog'
 
 
 data = targets['fundamentals']
@@ -35,3 +35,9 @@ cmdline.execute(
         .format(','.join(data['start_urls']), data['target_dir'], data['suffix'], no_log).split())
 
 #cmdline.execute("scrapy crawl biznesradar-prices --nolog".split()) #--nolog
+
+## IMPORTANT TODO verify if it's needed
+# remember to set in settings.py
+# DEPTH_PRIORITY = 1
+# SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
+# SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'

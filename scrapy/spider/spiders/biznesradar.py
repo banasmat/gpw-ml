@@ -2,6 +2,7 @@
 import scrapy
 import zipfile, io, os, csv
 import pandas as pd
+from time import sleep
 
 
 class BiznesradarSpider(scrapy.Spider):
@@ -9,6 +10,7 @@ class BiznesradarSpider(scrapy.Spider):
     allowed_domains = ['biznesradar.pl']
 
     url_base = 'https://www.biznesradar.pl'
+    company_links = {}
 
     def __init__(self,
                  start_urls=(),
@@ -20,19 +22,38 @@ class BiznesradarSpider(scrapy.Spider):
         self.start_urls = list(map(lambda x: self.url_base + x, start_urls.split(',')))
         self.target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', target_dir)
         self.suffix = suffix
+        print(self.start_urls)
 
     def parse(self, response: scrapy.http.response.Response):
+        print(response.url)
 
-        # self.start_urls have to be run in given order, one after another (after previous is finished)
-        # therefore we're setting requests priority
-        item_order = self.start_urls.index(response.url)
-        urls_len = len(self.start_urls)
+        print('gathering links', response.url)
+        self.company_links[response.url] = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
 
-        company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
-        for link in company_links:
-            print(self.url_base + link + self.suffix)
-            yield scrapy.Request(self.url_base + link + self.suffix,
-                                 self.parse_company_page, priority=urls_len - item_order)
+        # Continue only when all company_links are gathered
+        can_continue = True
+        for start_url in self.start_urls:
+            if start_url not in self.company_links:
+                print('Not all company links yet gathered', response.url)
+                can_continue = False
+                break
+
+        if can_continue:
+
+            print('All links gathered. Proceeding.')
+
+            company_links = []
+            # Organize links in correct order (same as start_urls)
+            for start_url in self.start_urls:
+                company_links += self.company_links[start_url]
+
+            links_len = len(company_links)
+            for i, link in enumerate(company_links):
+                # print(self.url_base + link + self.suffix)
+                yield scrapy.Request(self.url_base + link + self.suffix,
+                                     self.parse_company_page, priority=links_len - i)
+            print('Scheduled all requests. Total', links_len)
+
 
     def parse_company_page(self, response):
 
