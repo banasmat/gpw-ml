@@ -9,36 +9,34 @@ class BiznesradarSpider(scrapy.Spider):
     allowed_domains = ['biznesradar.pl']
 
     url_base = 'https://www.biznesradar.pl'
-    # /spolki-raporty-finansowe-rachunek-zyskow-i-strat/akcje_gpw
-    # /spolki-raporty-finansowe-bilans/akcje_gpw
-    # /spolki-raporty-finansowe-przeplywy-pieniezne/akcje_gpw
-
-    # /spolki-wskazniki-wartosci-rynkowej/akcje_gpw
-    # /spolki-wskazniki-rentownosci/akcje_gpw
-    # /spolki-wskazniki-przeplywow-pienieznych/akcje_gpw
-    # /spolki-wskazniki-zadluzenia/akcje_gpw
-    # /spolki-wskazniki-plynnosci/akcje_gpw
-    # /spolki-wskazniki-aktywnosci/akcje_gpw
 
     def __init__(self,
-                 start_url='spolki-raporty-finansowe-rachunek-zyskow-i-strat',
+                 start_urls=(),
                  target_dir='fundamentals-biznesradar',
+                 suffix=',Q',
                  *args, **kwargs):
         super(BiznesradarSpider, self).__init__(*args, **kwargs)
-        self.start_urls = [self.url_base + '/' + start_url + '/akcje_gpw']
-        self.target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', target_dir)
 
+        self.start_urls = list(map(lambda x: self.url_base + x, start_urls.split(',')))
+        self.target_dir = os.path.join(os.path.abspath(os.getcwd()), '..', '..', 'resources', target_dir)
+        self.suffix = suffix
 
     def parse(self, response: scrapy.http.response.Response):
-        company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
 
+        # self.start_urls have to be run in given order, one after another (after previous is finished)
+        # therefore we're setting requests priority
+        item_order = self.start_urls.index(response.url)
+        urls_len = len(self.start_urls)
+
+        company_links = response.css('.qTableFull tr td:first-child a::attr(href)').extract()
         for link in company_links:
-            yield scrapy.Request(self.url_base + link,
-                                 self.parse_company_page)
-            # yield scrapy.Request(self.url_base + link + ',Q',
-            #                      self.parse_company_page)
+            print(self.url_base + link + self.suffix)
+            yield scrapy.Request(self.url_base + link + self.suffix,
+                                 self.parse_company_page, priority=urls_len - item_order)
 
     def parse_company_page(self, response):
+
+        print(response.url)
 
         symbol = response.css(".report-table::attr(data-symbol)").extract()[0]
         target_file = os.path.join(self.target_dir, symbol + '.csv')
@@ -52,10 +50,10 @@ class BiznesradarSpider(scrapy.Spider):
         quarters = list(map(lambda x: x.replace('\n', '').replace('\t', '').replace('\r', ''), quarters))
         values = list(map(lambda x: x.replace('h', '').replace(' ', '').replace('newest', ''), values))
 
-        print(symbol)
-        print(quarters)
-        print(labels)
-        print(values)
+        # print(symbol)
+        # print(quarters)
+        # print(labels)
+        # print(values)
 
         current_label_index = -1
         current_quarter_index = -1
