@@ -270,9 +270,7 @@ def analyze_dataset():
     # print distributions and corelations for every quarter
     # create column: Price delta - check correlations (heatmap), maybe first scale data
 
-
     return flat_df
-
 
 
 def build_dataset(force_reset=False):
@@ -288,9 +286,22 @@ def build_dataset(force_reset=False):
 
     quarter_files = os.listdir(fundamentals_by_quarter_dir)
 
+    cols_with_diffs = []
+    for col in fundamental_cols:
+        if col == 'Price':
+            cols_with_diffs.append(col)
+        else:
+            cols_with_diffs += [
+                col,
+                col + '_yy',
+                col + '_sy',
+                col + '_qq',
+                col + '_sq',
+            ]
+
     for quarter_i ,file in enumerate(quarter_files):
         with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
-            df = pd.read_csv(f, index_col=0, usecols=fundamental_cols)
+            df = pd.read_csv(f, index_col=0, usecols=cols_with_diffs)
 
         if dataset_x is None:
             dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)))
@@ -315,19 +326,10 @@ def modify_to_diffs(x=None, y=None):
 
     def get_scaled_diffs(x: np.array):
 
-        print('A')
-        print(x[0])
-        print(x[1])
-
         x = np.diff(x) / x[:-1]
 
         x[x == np.inf] = 1
         x[x == -np.inf] = -1
-
-        if len(x[x > 100]) > 0:
-            for i, el in enumerate(x):
-                print(i, el)
-            quit()
 
         # Insert zero at the beginning to retain initial shape
         x = np.insert(x, 0, [0.0])

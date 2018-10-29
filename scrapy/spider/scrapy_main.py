@@ -11,8 +11,8 @@ targets = {
         ],
         'suffix': ',Q'
     },
-    'indicators': {
-        'target_dir': 'incidcators-biznesradar',
+    'indicators': { # TODO indicators have one morefield (~sektor)
+        'target_dir': 'indicators-biznesradar',
         'start_urls': [
             '/spolki-wskazniki-wartosci-rynkowej/akcje_gpw',
             '/spolki-wskazniki-rentownosci/akcje_gpw',
@@ -25,11 +25,14 @@ targets = {
     }
 }
 
+# TODO BTW kurs akcji jest w QuoteCurrent (ale nie wiem czy to średnia)
+
 no_log = ''
 no_log = '--nolog'
 
 
-data = targets['fundamentals']
+# data = targets['fundamentals']
+data = targets['indicators']
 cmdline.execute(
     'scrapy crawl biznesradar -a start_urls={} -a target_dir={} -a suffix={} {}'
         .format(','.join(data['start_urls']), data['target_dir'], data['suffix'], no_log).split())

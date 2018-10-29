@@ -13,20 +13,15 @@ x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
-# Note: sometimes diffs are very large between quarters e.g. 06N IncomeOtherOperatingCosts 2013/Q3 (1000) - 2013/Q4 (1397000) FIXME checked on webiste, this data is not there ???
-# TODO we might need to use years instead of quarters BUT should we take mean or sum
-# - maybe just scrape yearly data (?) -> checked, still differernces might be pretty large
-# - OR scrape diff data from biznesradar (look into html source)
-# - OR use logarithm for diffs
-
-
-
-diffs_x, diffs_y = dataset_builder.modify_to_diffs(x, y)
+na, diffs_y = dataset_builder.modify_to_diffs(x, y)
 # dataset_builder.save_diffs_df(diffs_x, diffs_y)
 
+# TODO
+# - check once more for empty values and maybe choose other columns
 
-print(np.max(diffs_x))
-quit()
+
+# print(np.max(diffs_x))
+# quit()
 
 # for i, diff in enumerate(diffs_y[-1][:10]):
 #     print(i, diff, y[-2][i], y[-1][i])
@@ -36,9 +31,11 @@ y = diffs_y
 x = dataset_builder.scale_with_other_tickers(x)
 # y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
-x = np.concatenate((x, diffs_x), 2)
+# x = np.concatenate((x, diffs_x), 2)
 # TODO consider using np.log instead
-x = dataset_builder.shrink_outliers(x, 1, border=10.0)
+# x = dataset_builder.shrink_outliers(x, 1, border=10.0)
+
+print(np.max(x))
 
 x = np.nan_to_num(x)
 # print(y.shape)
