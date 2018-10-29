@@ -66,65 +66,76 @@ class BiznesradarSpider(scrapy.Spider):
 
         quarters = response.css(base_css + 'th.thq::text').extract()
         labels = response.css(base_css + 'tr[data-field]::attr(data-field)').extract()
-        values = response.css(base_css + 'td.h .value span::text, ' + base_css + 'td.h:empty::attr(class)').extract()
-        diffs = response.css(base_css + 'td.h').extract()
+
+        cells = response.css(base_css + 'td.h').extract()
+        values = []
         diffs_processed = []
 
         #TODO verify if regex are working
         #TODO consider parametrizing
-        regex_empty = re.compile(r"^((?!class=\"changeqq\").)*$")
+        regex_value = re.compile(r"<span class=\"value\"><span class=\"pv\"><span>(-?[\d\s]+)<\/span><\/span><\/span>")
+        regex_diffs_empty = re.compile(r"^((?!class=\"(changeqq|changeyy)\").)*$")
         regex_yy = re.compile(r"<div class=\"changeyy\">r\/r <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span>")
         regex_sy = re.compile(r"<div class=\"changeyy\">r\/r <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span><span class=\"sectorv\">~sektor <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span><\/span></div>")
         regex_qq = re.compile(r"<div class=\"changeqq\">k\/k <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span>")
         regex_sq = re.compile(r"<div class=\"changeqq\">k\/k <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span><span class=\"sectorv\">~sektor <span class=\"pv\"><span><span class=\"q_ch_per (cplus|cminus)\">((\+|\-)\d+\.\d+%)<\/span><\/span><\/span><\/span></div>")
-        for diff in diffs:
-            if diff == '<td class="h"></td>':
+        for cell in cells:
+            if cell == '<td class="h"></td>':
                 diffs_processed += ['', '', '', '']
-            elif regex_empty.match(diff):
+            elif regex_diffs_empty.match(cell):
                 diffs_processed += ['', '', '', '']
             else:
                 vals = []
-                match = regex_yy.search(diff)
+                match = regex_yy.search(cell)
                 if match:
                     vals.append(match.group(2))
                 else:
                     vals.append('')
-                match = regex_sy.search(diff)
+                match = regex_sy.search(cell)
                 if match:
                     vals.append(match.group(5))
                 else:
                     vals.append('')
-                match = regex_qq.search(diff)
+                match = regex_qq.search(cell)
                 if match:
                     vals.append(match.group(2))
                 else:
                     vals.append('')
-                match = regex_sq.search(diff)
+                match = regex_sq.search(cell)
                 if match:
                     vals.append(match.group(5))
                 else:
                     vals.append('')
+                diffs_processed += vals
+
+            match = regex_value.search(cell)
+            if match:
+                values.append(match.group(1))
+            else:
+                values.append('')
 
         labels_with_diffs = []
         for label in labels:
-            labels_with_diffs += [label, label + '_rr', label + '_sr', label + '_qq', label + '_sq']
+            labels_with_diffs += [label, label + '_yy', label + '_sy', label + '_qq', label + '_sq']
         labels = labels_with_diffs
 
-        values_with_diffs = []
-        for value in values:
-            values_with_diffs.append(value)
-            for i in range(0,4):
-                values_with_diffs.append(diffs_processed.pop(0))
-        values = values_with_diffs
+        values = list(map(lambda x: x.replace('h', '').replace(' ', '').replace('newest', ''), values))
+        print(diffs_processed)
 
         quarters = list(map(lambda x: x.replace('\n', '').replace('\t', '').replace('\r', ''), quarters))
-        values = list(map(lambda x: x.replace('h', '').replace(' ', '').replace('newest', '').replace('+', '').replace('%', ''), values))
+        values = list(map(lambda x: x.replace('h', '').replace(' ', '').replace('newest', ''), values))
+        diffs_processed = list(map(lambda x: x.replace('+', '').replace('%', ''), diffs_processed))
         # print(symbol)
         # print(quarters)
         # print(labels)
         # print(values)
 
+        print(labels)
+        print(values)
+        print(quarters)
+
         current_label_index = -1
+        current_value_label_index = -1
         current_quarter_index = -1
         quarters_len = len(quarters)
 
@@ -136,14 +147,47 @@ class BiznesradarSpider(scrapy.Spider):
             if i % quarters_len == 0:
                 current_label_index += 1
                 current_quarter_index = 0
+                current_value_label_index += 1
+
+            # print()
+            # print('value', i)
+            # print(current_label_index)
+            # print(labels[current_label_index])
+            #
+            # print(current_quarter_index)
+            # print(quarters[current_quarter_index])
 
             val = values[i]
+
             if str(val) != '':
-                val = int(float(val) * 1000) #TODO check if all numbers are in thousands
+                val = str(int(float(val) * 1000)) #TODO check if all numbers are in thousands
 
             df.at[labels[current_label_index], quarters[current_quarter_index]] = val
 
+            if current_quarter_index == quarters_len-1:
+                # print('adding diffs', i)
+                for j in range(0, 4):
+
+                    current_label_index += 1
+
+                    for quarter_i in range(0, quarters_len):
+
+                        diff_val = diffs_processed[current_value_label_index*4*quarters_len+quarter_i*4+j]
+                        # print()
+                        # print(current_value_label_index)
+                        # print(current_value_label_index*4*quarters_len+quarter_i*4+j)
+                        # print(diff_val)
+                        #
+                        # print(current_label_index)
+                        # print(labels[current_label_index])
+                        #
+                        # print(quarter_i)
+                        # print(quarters[quarter_i])
+
+                        df.at[labels[current_label_index], quarters[quarter_i]] = diff_val
+
         self.save_to_csv(df, target_file)
+
 
     def save_to_csv(self, df, target_file):
         mode = 'w'
