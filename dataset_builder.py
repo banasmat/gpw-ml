@@ -11,6 +11,7 @@ from sklearn.preprocessing import minmax_scale
 pd.set_option('display.width', 0)
 # np.set_printoptions(precision=4, suppress=True)
 np.set_printoptions(formatter={'all':lambda x: str(x)})
+pd.options.display.max_rows = 999
 
 fundamentals_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-biznesradar')
 indicators_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'indicators-biznesradar')
@@ -19,88 +20,6 @@ fundamentals_by_quarter_dir = os.path.join(os.path.abspath(os.getcwd()), 'resour
 fundamentals_by_quarter_diffs_dir = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'fundamentals-by-quarter-diffs')
 dataset_x_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-x.pkl')
 dataset_y_pickle = os.path.join(os.path.abspath(os.getcwd()), 'resources', 'dataset-y.pkl')
-
-fundamental_cols = (
-                'IncomeCostOfSales',
-                'IncomeNetGrossProfit',
-                'IncomeBeforeTaxProfit',
-                'BalanceNoncurrInvestments',
-                'IncomeAdministrativExpenses',
-                'BalanceNoncurrentOtherLiabilities',
-                'BalanceCurrentInvestments',
-                'BalanceAssetsForSale',
-                'BalanceProperty',
-                'BalanceNoncurrentLeasing',
-                'IncomeFinanceCosts',
-                'BalanceInventory',
-                'BalanceCurrentAssets',
-                'BalanceIntangibleAssets',
-                'CashflowAmortization',
-                'BalanceTotalAssets',
-                'CashflowFinancingCashflow',
-                'IncomeFinanceIncome',
-                'IncomeOtherOperatingCosts',
-                'BalanceOtherNoncurrentAssets',
-                'CashflowCapex',
-                'BalanceNoncurrentAssets',
-                'IncomeOtherOperatingIncome',
-                'CashflowInvestingCashflow',
-                'CashflowOperatingCashflow',
-                'IncomeEBIT',
-                'IncomeGrossProfit',
-                'IncomeRevenues',
-                'IncomeNetProfit',
-                'Price',
-
-                # indicators
-                'QuoteCurrent',
-                'ShareAmountCurrent',
-                'WKCurrent',
-                'CWKCurrent',
-                'WKGrahamCurrent',
-                'CWKGrahamCurrent',
-                'PCurrent',
-                'CPCurrent',
-                'ZCurrent',
-                'CZCurrent',
-                'ZOCurrent',
-                'CZOCurrent',
-                'EVCurrent',
-                'EVPCurrent',
-                'EVEBITCurrent',
-                'EVEBITDACurrent',
-                'DTAR',
-                'CG',
-                'LDER',
-                'PZAT',
-                'PELDR',
-                'TSF',
-                'ZKO',
-                'OSF',
-                'NetDebt',
-                'NetDebtEBITDA',
-                'DebtFin',
-                'DebtFinEBITDA',
-                'SP1',
-                'SP2',
-                'CAR',
-                'QR',
-                'CR',
-                'PP',
-                'RCLR',
-                'KP',
-                'PKKO',
-                'RN',
-                'CRN',
-                'CPZ',
-                'RZ',
-                'CRZ',
-                'RMO',
-                'RMT',
-                'RM',
-                'COP',
-                'CSP',
-            )
 
 
 def __quarter_to_date(quarter):
@@ -210,27 +129,18 @@ def get_tickers():
     return df.index.tolist()
 
 
-def _get_cols_with_diffs():
-    cols_with_diffs = []
-    for col in fundamental_cols:
-        if col == 'Price':
-            cols_with_diffs.append(col)
-        else:
-            cols_with_diffs += [
-                # col,
-                col + '_yy',
-                col + '_sy',
-                col + '_qq',
-                col + '_sq',
-            ]
-    return cols_with_diffs
+def _get_cols():
+    with open(os.path.join(os.path.abspath(os.getcwd()), 'resources', 'df_cols.txt')) as f:
+        fundamental_cols = f.read().splitlines()
+
+    return fundamental_cols
 
 
 def analyze_dataset():
     dfs = []
     flat_df = None
 
-    cols = _get_cols_with_diffs()
+    cols = _get_cols()
 
     for file in sorted(os.listdir(fundamentals_by_quarter_dir))[1:]:
         df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), usecols=cols)
@@ -239,21 +149,22 @@ def analyze_dataset():
         sum_df.fillna(0, inplace=True)
 
         # remove empty rows
-        # print(sum_df.loc[sum_df == 0])
-        # df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
+        df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
         if flat_df is None:
             flat_df = df
         else:
             flat_df = flat_df.append(df, ignore_index=True)
 
-    print(flat_df.describe())
-    print(statistic_utils.missing_data_ordered(flat_df, 100))
-    quit()
+    # print(flat_df.describe())
+    missing_data = statistic_utils.missing_data_ordered(flat_df, 1000)
+    # print(missing_data)
+    # print(missing_data.describe())
+    # quit()
 
     for df in reversed(dfs):
         df.fillna(0, inplace=True)
         #
-        # statistic_utils.correlation_heatmap(df)
+        statistic_utils.correlation_heatmap(df)
         # quit()
 
         # cols = [
@@ -309,7 +220,7 @@ def build_dataset(force_reset=False):
 
     quarter_files = os.listdir(fundamentals_by_quarter_dir)
 
-    cols = _get_cols_with_diffs()
+    cols = _get_cols()
 
     for quarter_i, file in enumerate(quarter_files):
         with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
@@ -358,7 +269,7 @@ def modify_to_diffs(x=None, y=None):
 def save_diffs_df(diffs_x, diffs_y):
     quarter_files = os.listdir(fundamentals_by_quarter_dir)
     all_tickers = get_tickers()
-    cols = list(map(lambda x: x + '_diff', fundamental_cols))
+    cols = list(map(lambda x: x + '_diff', _get_cols()))
 
     for quarter_i, file in enumerate(quarter_files[1:]):
         df = pd.DataFrame(index=all_tickers, columns=cols)

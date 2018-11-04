@@ -20,7 +20,7 @@ def missing_data_ordered(df, length=20):
     total = df.isnull().sum().sort_values(ascending=False)
     percent = (df.isnull().sum() / df.isnull().count()).sort_values(ascending=False)
     missing_data = pd.concat([total, percent], axis=1, keys=['Total', 'Percent'])
-    return missing_data.head(length)
+    return missing_data.tail(length)
 
 
 def outliers(df: pd.DataFrame):

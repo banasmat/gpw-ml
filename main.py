@@ -5,7 +5,7 @@ from scipy import stats
 import numpy as np
 
 # dataset_builder.organize_data_to_quarters(fillna_method='ffill', save=True)
-dataset_builder.analyze_dataset()
+# dataset_builder.analyze_dataset()
 
 x, y = dataset_builder.build_dataset(force_reset=False)
 # First quarter has almost no information
@@ -28,12 +28,12 @@ na, diffs_y = dataset_builder.modify_to_diffs(x, y)
 #     print(i, diff, y[-2][i], y[-1][i])
 # quit()
 y = diffs_y
-#FIXME problem: absolute values should have different scale than diffs
-print(np.max(x))
-x = np.log(x)
-print(np.max(x))
 
-quit()
+# Reduce high outliers by applying log to all values
+x = np.nan_to_num(x)
+x = np.ma.log(x)
+x = x.filled(0)
+
 x = dataset_builder.scale_with_other_tickers(x)
 # y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
