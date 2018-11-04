@@ -210,22 +210,45 @@ def get_tickers():
     return df.index.tolist()
 
 
+def _get_cols_with_diffs():
+    cols_with_diffs = []
+    for col in fundamental_cols:
+        if col == 'Price':
+            cols_with_diffs.append(col)
+        else:
+            cols_with_diffs += [
+                # col,
+                col + '_yy',
+                col + '_sy',
+                col + '_qq',
+                col + '_sq',
+            ]
+    return cols_with_diffs
+
+
 def analyze_dataset():
     dfs = []
     flat_df = None
-    for file in sorted(os.listdir(fundamentals_by_quarter_diffs_dir))[1:]:
-        df = pd.read_csv(os.path.join(fundamentals_by_quarter_diffs_dir, file), index_col=0)
+
+    cols = _get_cols_with_diffs()
+
+    for file in sorted(os.listdir(fundamentals_by_quarter_dir))[1:]:
+        df = pd.read_csv(os.path.join(fundamentals_by_quarter_dir, file), usecols=cols)
         dfs.append(df)
-        sum_df = df.drop('Price_diff', axis=1).sum(axis=1)
+        sum_df = df.drop('Price', axis=1).sum(axis=1)
+        sum_df.fillna(0, inplace=True)
+
         # remove empty rows
-        df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
+        # print(sum_df.loc[sum_df == 0])
+        # df.drop(index=sum_df.loc[sum_df == 0].index, inplace=True)
         if flat_df is None:
             flat_df = df
         else:
             flat_df = flat_df.append(df, ignore_index=True)
 
-    # print(flat_df.describe())
-    # print(statistic_utils.missing_data_ordered(flat_df, 100))
+    print(flat_df.describe())
+    print(statistic_utils.missing_data_ordered(flat_df, 100))
+    quit()
 
     for df in reversed(dfs):
         df.fillna(0, inplace=True)
@@ -286,22 +309,11 @@ def build_dataset(force_reset=False):
 
     quarter_files = os.listdir(fundamentals_by_quarter_dir)
 
-    cols_with_diffs = []
-    for col in fundamental_cols:
-        if col == 'Price':
-            cols_with_diffs.append(col)
-        else:
-            cols_with_diffs += [
-                col,
-                col + '_yy',
-                col + '_sy',
-                col + '_qq',
-                col + '_sq',
-            ]
+    cols = _get_cols_with_diffs()
 
-    for quarter_i ,file in enumerate(quarter_files):
+    for quarter_i, file in enumerate(quarter_files):
         with open(os.path.join(fundamentals_by_quarter_dir, file), 'r') as f:
-            df = pd.read_csv(f, index_col=0, usecols=cols_with_diffs)
+            df = pd.read_csv(f, index_col=0, usecols=cols)
 
         if dataset_x is None:
             dataset_x = np.zeros((len(quarter_files), len(df.index), len(df.columns)))

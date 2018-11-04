@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, SimpleRNN, Dropout
+from keras.layers import Dense, SimpleRNN, Dropout, LSTM
 from keras.regularizers import L1L2
 import numpy as np
 import os
@@ -23,7 +23,7 @@ def train(x_train, y_train):
 def create_model(x_data):
     regressor = Sequential()
 
-    regressor.add(SimpleRNN(units=800, return_sequences=True, input_shape=(x_data.shape[1], x_data.shape[2])))
+    regressor.add(LSTM(units=900, return_sequences=True, input_shape=(x_data.shape[1], x_data.shape[2])))
             # , kernel_regularizer=L1L2(0.01), activity_regularizer=L1L2(0.01), recurrent_regularizer=L1L2(0.01)))
     regressor.add(Dropout(0.2))
 
@@ -39,7 +39,7 @@ def create_model(x_data):
     regressor.add(Dense(units=x_data.shape[1]))
 
     # RMSprop optimizer is usually used for rnn
-    regressor.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae', 'mape', 'cosine'])
+    regressor.compile(optimizer='rmsprop', loss='mse') #, metrics=['mse', 'mae', 'mape', 'cosine']
 
     return regressor
 
