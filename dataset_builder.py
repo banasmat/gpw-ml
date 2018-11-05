@@ -43,6 +43,9 @@ def organize_data_to_quarters(fillna_method=None, save=False):
 
     for file in fundamental_files:
 
+        if os.path.isfile(os.path.join(prices_dir, file)) is False:
+            continue
+
         ticker = file[:-4]
 
         with open(os.path.join(fundamentals_dir, file), 'r') as f:

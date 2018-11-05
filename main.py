@@ -38,15 +38,18 @@ x = dataset_builder.scale_with_other_tickers(x)
 # y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
 # x = np.concatenate((x, diffs_x), 2)
-# TODO consider using np.log instead
+#FIXME test data is broken? (too many zeros?)
 # x = dataset_builder.shrink_outliers(x, 1, border=10.0)
 
 x = np.nan_to_num(x)
 # print(y.shape)
 
+# 2018Q3 has too much missing data for now
+x = x[:-1]
+y = y[:-1]
 
-print(x)
-print(y)
+# print(x)
+# print(y)
 
 # NOTE: after ca 2500 epochs all results turned to NaN
 # NOTE: only diff data: even after 900 loss goes drastically up and then turn to NaN
