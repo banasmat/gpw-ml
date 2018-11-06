@@ -57,7 +57,11 @@ x = np.nan_to_num(x)
 predictions = rnn.predict(x)
 tickers = dataset_builder.get_tickers()
 
-dataset_builder.save_results(predictions, y)
+# Translating to see all price changes > 0.2 above zero TODO is it valid method?
+predictions = predictions - np.log(0.8)
+y = y - np.log(0.8)
+
+# dataset_builder.save_results(predictions, y)
 
 predictions = predictions[-1:][0][100:300]
 test_data = y[-1:][0][100:300]
