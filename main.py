@@ -14,25 +14,21 @@ x = x[1:-1]
 # y is shifted by 1 forward, so we predict y in the future
 y = y[2:]
 
+# Last quarter has too little information for now
+x = x[:-1]
+y = y[:-1]
+
 na, diffs_y = dataset_builder.modify_to_diffs(x, y)
 # dataset_builder.save_diffs_df(diffs_x, diffs_y)
 
-# print(np.max(diffs_x))
-# quit()
-
-# for i, diff in enumerate(diffs_y[-1][:10]):
-#     print(i, diff, y[-2][i], y[-1][i])
-# quit()
 y = diffs_y
 # print(y[-2:-1])
 
-print(np.min(y))
-print(np.max(y))
+x = dataset_builder.scale_with_other_tickers(x)
 
-# FIXME can't take logarithms of negative numbers
-# log only positive numbers (min = -1, max = 1055)
-# OR remember which nums are negative, turn them to positive, log and turn back to negative
-
+# Translate and transform: prepare for logarithmic function (can't apply to negative numbers)
+x = x+1.01
+y = y+1.01
 
 # Reduce high outliers by applying log to all values
 x = np.nan_to_num(x)
@@ -41,9 +37,7 @@ x = x.filled(0)
 
 y = np.ma.log(y)
 y = y.filled(0)
-print(y[-2:-1])
-quit()
-x = dataset_builder.scale_with_other_tickers(x)
+
 # y = dataset_builder.scale_prices(y)
 # Note: removing diffs from dataset gives worse result
 # x = np.concatenate((x, diffs_x), 2)
@@ -52,14 +46,6 @@ x = dataset_builder.scale_with_other_tickers(x)
 
 x = np.nan_to_num(x)
 # print(y.shape)
-
-# 2018Q3 has too much missing data for now
-x = x[:-1]
-y = y[:-1]
-
-# print(x)
-print(y[-2:])
-quit()
 
 # NOTE: after ca 2500 epochs all results turned to NaN
 # NOTE: only diff data: even after 900 loss goes drastically up and then turn to NaN
