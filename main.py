@@ -50,16 +50,16 @@ x = np.nan_to_num(x)
 # NOTE: after ca 2500 epochs all results turned to NaN
 # NOTE: only diff data: even after 900 loss goes drastically up and then turn to NaN
 # print(stats.describe(x))
-history = rnn.train(x[:-1], y[:-1])
-plt.plot(history.history['mean_squared_error'])
-plt.show()
+# history = rnn.train(x[:-1], y[:-1])
+# plt.plot(history.history['mean_squared_error'])
+# plt.show()
 
-predictions = rnn.predict(x[-1:])
+predictions = rnn.predict(x)
 tickers = dataset_builder.get_tickers()
 
-predictions = predictions[0][:100]
-test_data = y[-1:][0][:100]
-tickers = tickers[:100]
+predictions = predictions[-1:][0][100:300]
+test_data = y[-1:][0][100:300]
+tickers = tickers[100:300]
 
 for i, pred in enumerate(predictions):
     print(tickers[i], pred, y[-1][i])
