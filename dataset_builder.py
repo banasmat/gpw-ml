@@ -32,6 +32,13 @@ def __quarter_to_date(quarter):
     return datetime.strptime(dt, '%Y-%m-%d')
 
 
+def save_results(predictions, y):
+    with open(os.path.join(os.path.abspath(os.getcwd()), 'resources', 'results.csv'), 'w') as f:
+        data = np.array([predictions[-1:][0], y[-1:][0]])
+        df = pd.DataFrame(data.transpose(), columns=['Predictions', 'Real'], index=get_tickers())
+        df.to_csv(f, index_label='Ticker')
+
+
 def organize_data_to_quarters(fillna_method=None, save=False):
 
     dfs_by_quarter = {}

@@ -57,6 +57,8 @@ x = np.nan_to_num(x)
 predictions = rnn.predict(x)
 tickers = dataset_builder.get_tickers()
 
+dataset_builder.save_results(predictions, y)
+
 predictions = predictions[-1:][0][100:300]
 test_data = y[-1:][0][100:300]
 tickers = tickers[100:300]

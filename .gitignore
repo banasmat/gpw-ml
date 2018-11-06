@@ -2,3 +2,4 @@
 **/__pycache__
 resources/*.pkl
 resources/*.h5
+resources/results.csv
