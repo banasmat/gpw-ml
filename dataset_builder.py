@@ -142,6 +142,7 @@ def get_tickers():
 def _get_cols():
     with open(os.path.join(os.path.abspath(os.getcwd()), 'resources', 'df_cols.txt')) as f:
         fundamental_cols = f.read().splitlines()
+    fundamental_cols = list(filter(lambda x: x[-3:] not in ['_yy', '_sy', '_qq', '_sq'], fundamental_cols))
 
     return fundamental_cols
 
@@ -292,12 +293,12 @@ def save_diffs_df(diffs_x, diffs_y):
             df.to_csv(diff_f)
 
 
-def scale_with_other_tickers(x):
+def scale_with_other_tickers(x, axis=2):
 
     def scale_min_max(a: np.array):
         return minmax_scale(a)
 
-    x = np.apply_along_axis(scale_min_max, 2, x)
+    x = np.apply_along_axis(scale_min_max, axis, x)
     return x
 
 
